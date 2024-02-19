@@ -10,7 +10,7 @@ void UQuickAssetAction::DuplicateAsset(int32 NoOfDuplicates, int32 StartingNumbe
 {
 	if (NoOfDuplicates <= 0)
 	{
-		Print(TEXT("Please enter a valid number"), FColor::Red);
+		ShowDialogMsg(EAppMsgType::Ok, TEXT("Enter a Valid Duplicate Number"));
 		return;
 	}
 	TArray<FAssetData> SelectedAssets{ UEditorUtilityLibrary::GetSelectedAssetData() };
@@ -26,10 +26,10 @@ void UQuickAssetAction::DuplicateAsset(int32 NoOfDuplicates, int32 StartingNumbe
 			bool AssetAlreadyExist{ UEditorAssetLibrary::DoesAssetExist(Destination) };
 			if (AssetAlreadyExist)
 			{
-				Print(FString::Printf(TEXT("Naming Conflict: %s"), *NewAssetName), FColor::Red);
+				ShowDialogMsg(EAppMsgType::Ok,FString::Printf(TEXT("Naming Conflict: %s"), *NewAssetName));
 				if (counter > 0)
 				{
-					Print(FString::Printf(TEXT("%s succesfully duplicated %d times"), *AssetName, counter), FColor::Green);
+					ShowNotifyInfo(FString::Printf(TEXT("%s succesfully duplicated %d times"), *AssetName, counter));
 				}
 				return;
 			}
@@ -39,6 +39,9 @@ void UQuickAssetAction::DuplicateAsset(int32 NoOfDuplicates, int32 StartingNumbe
 			}
 			UEditorAssetLibrary::SaveAsset(Destination, false);
 		}
-		Print(FString::Printf(TEXT("%s succesfully duplicated %d times"), *AssetName, counter), FColor::Green);
+		if (counter > 0)
+		{
+			ShowNotifyInfo(FString::Printf(TEXT("%s succesfully duplicated %d times"), *AssetName, counter));
+		}
 	}
 }
