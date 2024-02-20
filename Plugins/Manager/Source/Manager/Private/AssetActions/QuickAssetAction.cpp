@@ -6,6 +6,7 @@
 #include "EditorUtilityLibrary.h"
 #include "EditorAssetLibrary.h"
 
+
 void UQuickAssetAction::DuplicateAsset(int32 NoOfDuplicates, int32 StartingNumber)
 {
 	if (NoOfDuplicates <= 0)
@@ -43,5 +44,51 @@ void UQuickAssetAction::DuplicateAsset(int32 NoOfDuplicates, int32 StartingNumbe
 		{
 			ShowNotifyInfo(FString::Printf(TEXT("%s succesfully duplicated %d times"), *AssetName, counter));
 		}
+	}
+}
+
+void UQuickAssetAction::AddPrefix()
+{
+	TArray<UObject*>  SelectedAssets{ UEditorUtilityLibrary::GetSelectedAssets()};
+	uint32 counter{ 0 };
+	for (UObject* SelectedAsset : SelectedAssets)
+	{
+		FString* Prefix{ PrefixMap.Find(SelectedAsset->GetClass()) };
+		if (!Prefix)
+		{
+			
+			Print(FString::Printf(TEXT("%s assets doesn't have a prefix"), *SelectedAsset->GetClass()->GetName()), FColor::Red);
+			continue;
+		}
+		else
+		{
+			if (!SelectedAsset->GetName().StartsWith(*Prefix))
+			{
+				FString NewName;
+				if (SelectedAsset->GetClass() == UMaterialInstanceConstant::StaticClass())
+				{
+					FString OldName{ SelectedAsset->GetName() };
+					if (OldName.StartsWith(TEXT("M_")))
+					{
+						OldName.RemoveAt(0, 2);
+					}
+					if (OldName.EndsWith(TEXT("_Inst")))
+					{
+						OldName.RemoveAt(OldName.Len() - 5, 5);
+					}
+					NewName = *Prefix + OldName;
+				}
+				else
+				{
+					NewName = *Prefix + SelectedAsset->GetName() ;
+				}
+				UEditorUtilityLibrary::RenameAsset(SelectedAsset, NewName);
+				++counter;
+			}
+		}
+	}
+	if (counter > 0)
+	{
+		ShowNotifyInfo(FString::Printf(TEXT("Successfully Added Prefixes to %d assets"), counter));
 	}
 }
